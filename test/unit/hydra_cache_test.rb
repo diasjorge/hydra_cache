@@ -51,7 +51,16 @@ describe HydraCache do
   end
 
   it 'should handle different order of body' do
-    assert false
+    r1 = Typhoeus::Request.new("http://example.com", :body => "foo=bar\nbaz=wadus", :method => :post)
+    hydra.queue r1
+    r2 = Typhoeus::Request.new("http://example.com", :body => "baz=wadus\nfoo=bar", :method => :post)
+    hydra.queue r2
+
+    within_construct do |c|
+      HydraCache.fixtures_path = Dir.pwd
+      hydra.run
+      Dir["*.yml"].size.must_equal 1
+    end
   end
 
   it 'should handle different methods for same url' do
